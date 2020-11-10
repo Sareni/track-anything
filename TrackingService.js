@@ -37,6 +37,7 @@
 })();; */
 
 const axios = require('axios');
+const { trackingURL } = require('./config/routes');
 
 
 function mergeParams(key, conf, trackingParams) {
@@ -50,8 +51,8 @@ function mergeParams(key, conf, trackingParams) {
         }
     }
 
-    // ad trackingParams
-    for(const [key, value] of Object.entries(conf)) {
+    // add trackingParams
+    for(const [key, value] of Object.entries(trackingParams)) {
         if (!!value) {
             params[key] = value;
         }
@@ -63,22 +64,21 @@ function mergeParams(key, conf, trackingParams) {
 
 function sendTrack(key, conf, trackingParams) {
     const params = mergeParams(key, conf, trackingParams);
-    const { key: accountKey = '', type = '', applicationKey = '' } = params;
-    console.log('Track: ', type, '. ', key, conf, trackingParams);
-    const res = axios.post('http://tracking.zenpa.at', {
+    const { key: accountKey = '', type: eventType = '', applicationKey = '' } = params; // TODO: rename key directly
+    const res = axios.post(trackingURL, {
         accountKey,
-        applicationKey
-    }).then(res => {
-        console.log(`statusCode: ${res.statusCode}`);
-        console.log(res);
-      })
-      .catch(error => {
+        applicationKey,
+        eventType
+    }).catch(error => {
         console.error(error);
-      });
+    });
 }
 
 module.exports = {
-    initialize (key, conf) {
+    initialize (key, conf = {}) {
+        if(!key) {
+            throw new Error('Track-Anything: Key has to be set!');
+        }
         this.trackPageview = function(trackingParams) {
             trackingParams.type = 'pageview';
             sendTrack(key, conf, trackingParams);
