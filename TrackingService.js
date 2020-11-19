@@ -64,11 +64,11 @@ function mergeParams(key, conf, trackingParams) {
 
 function sendTrack(key, conf, trackingParams) {
     const params = mergeParams(key, conf, trackingParams);
-    const { key: accountKey = '', type: eventType = '', applicationKey = '' } = params; // TODO: rename key directly
+    const { key: account = '', type = '', applicationKey: application = '' } = params; // TODO: rename key directly
     const res = axios.post(trackingURL, {
-        accountKey,
-        applicationKey,
-        eventType
+        account,
+        application,
+        type
     }).catch(error => {
         console.error(error);
     });
