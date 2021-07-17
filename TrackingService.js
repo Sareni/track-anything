@@ -1,44 +1,5 @@
-
-/* = (function () {
-    let _key;
-    function initialize (key) {
-        _key = key;
-    }
-
-    function trackPageview() {
-        if (_key) {
-            console.log('Track: Pageview', _key);
-        } else {
-            console.log('Tracker not ready');
-        }
-    }
-})();
-/* export default (function () {
-    let sendTrack = () => {
-
-    }
-    initialize (key, config) {
-        
-    }
-
-    function trackPageview() {
-        console.log('Track: Pageview');
-    }
-    trackUseraction() {
-        console.log('Track: Useraction');
-    }
-    trackError() {
-        console.log('Track: Error');
-    }
-    sendGenericTrack() {
-        console.log('Track: Generic');
-    }
-
-})();; */
-
 const axios = require('axios');
-const { trackingURL } = require('./config/routes');
-
+const { trackingURL } = require('./config/track_anything_config');
 
 function mergeParams(key, conf, trackingParams) {
     // add key
@@ -61,14 +22,16 @@ function mergeParams(key, conf, trackingParams) {
     return params;
 }
 
-
 function sendTrack(key, conf, trackingParams) {
     const params = mergeParams(key, conf, trackingParams);
-    const { key: account = '', type = '', applicationKey: application = '' } = params; // TODO: rename key directly
+    const { key: account = '', type = '', applicationKey: application = '', value = '' } = params; // TODO: rename key directly
+    const trackDate = new Date();
     const res = axios.post(trackingURL, {
         account,
         application,
-        type
+        type,
+        value,
+        trackDate
     }).catch(error => {
         console.error(error);
     });
@@ -84,6 +47,7 @@ module.exports = {
             sendTrack(key, conf, trackingParams);
         };
         this.trackUseraction = function(trackingParams) {
+            trackingParams.type = 'useraction';
             sendTrack(key, conf, trackingParams);
         };
         this.trackError = function(trackingParams) {
