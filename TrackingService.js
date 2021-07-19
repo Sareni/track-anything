@@ -22,11 +22,44 @@ function mergeParams(key, conf, trackingParams) {
     return params;
 }
 
+function addTrackingPixel(url, params) {
+    let urlWithParams = url;
+    if (params && Object.keys(params).length > 0 && params.constructor === Object) {
+        urlWithParams = urlWithParams.concat('?');
+        for (const [key, value] of Object.entries(params)) {
+            let val = value;
+            if (value instanceof Date) {
+                val = value.toISOString();
+            };
+            urlWithParams = urlWithParams.concat(`${key}=${val}&`);
+        }
+        urlWithParams = urlWithParams.slice(0, -1);
+    }
+    
+    const trackingPixel = document.getElementById('taTrackingPixel');
+    if (trackingPixel) {
+      trackingPixel.src = urlWithParams;
+    } else {
+        const img = document.createElement('img');
+        img.src = urlWithParams;
+        img.id = 'taTrackingPixel';
+        document.getElementsByTagName('body')[0].appendChild(img);
+    }
+}
+
 function sendTrack(key, conf, trackingParams) {
     const params = mergeParams(key, conf, trackingParams);
     const { key: account = '', type = '', applicationKey: application = '', value = '' } = params; // TODO: rename key directly
     const trackDate = new Date();
-    const res = axios.post(trackingURL, {
+
+    addTrackingPixel(trackingURL, {
+        account,
+        application,
+        type,
+        value,
+        trackDate
+    });
+    /* const res = axios.get(trackingURL, {
         account,
         application,
         type,
@@ -34,7 +67,7 @@ function sendTrack(key, conf, trackingParams) {
         trackDate
     }).catch(error => {
         console.error(error);
-    });
+    }); */
 }
 
 module.exports = {
