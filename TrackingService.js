@@ -47,48 +47,51 @@ function addTrackingPixel(url, params) {
     }
 }
 
-function sendTrack(key, conf, trackingParams) {
+function sendTrack(key, inBrowserTracking, conf, trackingParams) {
     const params = mergeParams(key, conf, trackingParams);
     const { key: account = '', type = '', applicationKey: application = '', value = '' } = params; // TODO: rename key directly
     const trackDate = new Date();
 
-    addTrackingPixel(trackingURL, {
-        account,
-        application,
-        type,
-        value,
-        trackDate
-    });
-    /* const res = axios.get(trackingURL, {
-        account,
-        application,
-        type,
-        value,
-        trackDate
-    }).catch(error => {
-        console.error(error);
-    }); */
+    if (inBrowserTracking) {
+        addTrackingPixel(trackingURL, {
+            account,
+            application,
+            type,
+            value,
+            trackDate
+        });
+    } else {
+        const res = axios.post(trackingURL, {
+            account,
+            application,
+            type,
+            value,
+            trackDate
+        }).catch(error => {
+            console.error(error);
+        });
+    }
 }
 
 module.exports = {
-    initialize (key, conf = {}) {
+    initialize (key, inBrowserTracking = false, conf = {}) {
         if(!key) {
             throw new Error('Track-Anything: Key has to be set!');
         }
         this.trackPageview = function(trackingParams) {
             trackingParams.type = 'pageview';
-            sendTrack(key, conf, trackingParams);
+            sendTrack(key, inBrowserTracking, conf, trackingParams);
         };
         this.trackUseraction = function(trackingParams) {
             trackingParams.type = 'useraction';
-            sendTrack(key, conf, trackingParams);
+            sendTrack(key, inBrowserTracking, conf, trackingParams);
         };
         this.trackError = function(trackingParams) {
             trackingParams.type = 'error';
-            sendTrack(key, conf, trackingParams);
+            sendTrack(key, inBrowserTracking, conf, trackingParams);
         };
         this.sendGenericTrack = function(trackingParams) {
-            sendTrack(key, conf, trackingParams)
+            sendTrack(key, inBrowserTracking, conf, trackingParams)
         };
     },
     trackPageview() {
