@@ -1,7 +1,7 @@
 const trackingServers= {
-        host: '168.119.245.136',
-        port: '6767',
-        protocol: 'http'
+        host: 'tracking.ds2g.io',
+        port: '443',
+        protocol: 'https'
 };
 
 
